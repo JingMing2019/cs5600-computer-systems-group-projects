@@ -88,7 +88,22 @@ void print_and_clean(int fd, void *ptr, int max_len) {
 
 }
 
-
+int compare(char* x, char* y) {
+	int flag = 0;
+	while (*x != '\0' || *y != '\0') {
+		if (*x == *y) {
+			x++;
+			y++;
+		} 
+		else if ((*x == '\0' && *y != '\0')
+			|| (*x != '\0' && *y == '\0')
+			|| *x != *y) {
+			flag = 1;
+			break;
+		}
+	}
+	return flag;
+}
 
 
 
@@ -105,10 +120,20 @@ void main(void)
 
 	/* add your code here */
 	/* 
-	char* welcome_msg = "Hello, type lines of input, or 'quit'\n";
+	char *welcome_msg = "Hello, type lines of input, or 'quit'\n";
 	int max_len = 200;
 	print_and_clean(1, welcome_msg, max_len);
-	*/
 	
+	while (true) {
+		char* input = "";
+		readline(0, input, max_len);
+		int flag = compare(input, "quit");
+		if (flag == 0) {
+			exit(2);
+		} else {
+			print_and_clean(1, input, max_len);
+		}
+	}
+	*/
 	
 }
