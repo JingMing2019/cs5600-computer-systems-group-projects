@@ -6,7 +6,6 @@
 /* THE ONLY INCLUDE FILE */
 #include "sysdefs.h"
 
-#include <stdlib.h>
 
 /* write these functions */
 
@@ -47,9 +46,8 @@ int write(int fd, void *ptr, int len){
 
 void exit(int err){
 	/* add your code here*/
-	if (err < 0) {
-		_Exit(2);
-	}
+
+	syscall(__NR_exit, err);
 } /* https://man7.org/linux/man-pages/man2/exit.2.html */
 
 
@@ -84,6 +82,7 @@ void print_and_clean(int fd, void *ptr, int max_len) {
 
 
 	/* add your code here*/
+	
 
 
 
@@ -105,4 +104,11 @@ void main(void)
 	   string comparisons, or malloc for allocating memory).   */
 
 	/* add your code here */
+	/* 
+	char* welcome_msg = "Hello, type lines of input, or 'quit'\n";
+	int max_len = 200;
+	print_and_clean(1, welcome_msg, max_len);
+	*/
+	
+	
 }
