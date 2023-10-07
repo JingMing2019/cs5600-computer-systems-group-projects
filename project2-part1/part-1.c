@@ -29,8 +29,16 @@ int read(int fd, void *ptr, int len) {
 } /*https://man7.org/linux/man-pages/man2/read.2.html */
 
 
+/* __NR_write is defined in file sysdefs.h, it is the system call number
+		for the system function that performs writing.*/
 int write(int fd, void *ptr, int len){
 	/* add your code here*/
+	// TODO: implement other return -1 situation
+	if (len < 0) {
+		return -1;
+	}
+
+	return syscall(__NR_write, fd, ptr, len);
 } /* https://man7.org/linux/man-pages/man2/write.2.html */
 
 

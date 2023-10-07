@@ -6,5 +6,6 @@ Yingjie Huang, Yulun Wang, Jing Ming
 
 # Modified / Created Files
 1. Create **part-1.c** file, a duplicate of **part-1starter.c**.
+2. Implement `write` function.
 
 
