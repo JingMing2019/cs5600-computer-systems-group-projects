@@ -8,7 +8,6 @@
 
 
 /* write these functions */
-
 int read(int fd, void *ptr, int len);
 int write(int fd, void *ptr, int len);
 void exit(int err);
@@ -34,7 +33,6 @@ int read(int fd, void *ptr, int len) {
 		for the system function that performs writing.*/
 int write(int fd, void *ptr, int len){
 	/* add your code here*/
-	// TODO: implement other return -1 situation
 	if (len < 0) {
 		return -1;
 	}
@@ -66,12 +64,26 @@ void readline(int fd, void *ptr, int max_len) {
     You can assign a (void *) pointer to a (char *) by using proper casting if needed.*/
 
 	/* add your code here*/
+	char *buffer = (char *)ptr; // cast void pointer to character pointer buffer
+    	char temp; // temporarily hold the character read from the input
+    	int position = 0; // track the number of characters have been read
 
+    	while (position < max_len - 1) {
+        	int n = read(fd, &temp, 1); // read one character from fd each time
+        	if (n < 0) {
+            		exit(1); // error occurred during reading
+        	} else if (n == 0 || temp == '\n') {
+            		break; // end of input or end of line
+        	} else {
+            		buffer[position] = temp;
+            		position++;
+        	}
+    	}	
+
+    	buffer[position] = '\0'; // terminate the string
 }
 
-
-
-
+	
 /* print a string to stdout (file descriptor 1) */
 void print_and_clean(int fd, void *ptr, int max_len) {
 	/* This function prints a string pointed to by ptr to stdout by repeatedly calling
@@ -80,13 +92,25 @@ void print_and_clean(int fd, void *ptr, int max_len) {
 	After you print a character, clean the corresponding buffer location by replacing
 	the character printed by 0 */
 
-
 	/* add your code here*/
-	
+	// Cast the void* pointer to char* pointer, to increment it by 1 byte later.
+	char *temp = (void *)ptr;
 
-
-
+	for(int i = 0; i < max_len; i++) {
+		// Call write() to print 1 byte at a time.
+		int written = write(fd, temp, 1);
+		// If write() function return -1, means error occurs when writing a char
+		// to stdout, exit to terminate the process. exit(1) means exit with error.
+		if (written == -1) {
+			exit(1);
+		}
+		// Clean the buffer location. Replacing the printed character by "\0".
+		*temp = "\0";
+		// Increment the char* pointer by 1 byte.
+		temp++;
+	}
 }
+
 
 int compare(char* x, char* y) {
 	int flag = 0;
