@@ -5,7 +5,6 @@
 
 /* THE ONLY INCLUDE FILE */
 #include "sysdefs.h"
-#include <stdio.h>
 
 
 /* write these functions */
@@ -42,13 +41,11 @@ int write(int fd, void *ptr, int len){
 } /* https://man7.org/linux/man-pages/man2/write.2.html */
 
 
-
 void exit(int err){
 	/* add your code here*/
 
 	syscall(__NR_exit, err);
 } /* https://man7.org/linux/man-pages/man2/exit.2.html */
-
 
 
 /* Factor, factor! Don't put all your code in main()!
@@ -112,12 +109,12 @@ void print_and_clean(int fd, void *ptr, int max_len) {
 		} else {
 			// Clean the buffer location. Replacing the printed character by "0".
 			buffer[position] = '0';
-			// Increment the char* pointer by 1 byte.
+			// Increment the position by 1.
 			position++;
 		}
 	}
 	buffer[position] = '\0';
-}
+} 
 
 
 int compare(char* x, char* y) {
@@ -163,7 +160,11 @@ void main(void)
 		if (flag == 0) {
 			exit(2);
 		} else {
+			char intro_msg[] = "you typed: ";
+			print_and_clean(1, intro_msg, max_len);
 			print_and_clean(1, &input, max_len);
+			char next_line[] = "\n";
+			print_and_clean(1, next_line, max_len);
 		}
 	}
 	
