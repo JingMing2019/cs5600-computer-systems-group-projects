@@ -5,6 +5,7 @@
 
 /* THE ONLY INCLUDE FILE */
 #include "sysdefs.h"
+#include <stdio.h>
 
 
 /* write these functions */
@@ -94,21 +95,28 @@ void print_and_clean(int fd, void *ptr, int max_len) {
 
 	/* add your code here*/
 	// Cast the void* pointer to char* pointer, to increment it by 1 byte later.
-	char *temp = (char *)ptr;
+	char *buffer = (char *)ptr;
+	char temp;
+	int position = 0;
 
-	for(int i = 0; i < max_len; i++) {
+	while (position < max_len - 1) {
+		temp = buffer[position];
 		// Call write() to print 1 byte at a time.
-		int written = write(fd, temp, 1);
+		int written = write(fd, &temp, 1);
 		// If write() function return -1, means error occurs when writing a char
 		// to stdout, exit to terminate the process. exit(1) means exit with error.
-		if (written == -1) {
+		if (written < 0) {
 			exit(1);
+		} else if (written == 0 || temp == '\0') {
+			break;
+		} else {
+			// Clean the buffer location. Replacing the printed character by "0".
+			buffer[position] = '0';
+			// Increment the char* pointer by 1 byte.
+			position++;
 		}
-		// Clean the buffer location. Replacing the printed character by "\0".
-		temp[i] = '\0';
-		// Increment the char* pointer by 1 byte.
-		temp++;
 	}
+	buffer[position] = '\0';
 }
 
 
@@ -144,18 +152,18 @@ void main(void)
 
 	/* add your code here */
 	
-	char *welcome_msg = "Hello, type lines of input, or 'quit'\n";
+	char welcome_msg[] = "Hello, type lines of input, or 'quit'\n";
 	int max_len = 200;
 	print_and_clean(1, welcome_msg, max_len);
-	
+
 	while (1) {
-		char* input = "";
-		readline(0, input, max_len);
+		char input[] = "";
+		readline(0, &input, max_len);
 		int flag = compare(input, "quit");
 		if (flag == 0) {
 			exit(2);
 		} else {
-			print_and_clean(1, input, max_len);
+			print_and_clean(1, &input, max_len);
 		}
 	}
 	
