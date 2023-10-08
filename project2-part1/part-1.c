@@ -119,12 +119,12 @@ void main(void)
 	   string comparisons, or malloc for allocating memory).   */
 
 	/* add your code here */
-	
+	/*
 	char *welcome_msg = "Hello, type lines of input, or 'quit'\n";
 	int max_len = 200;
 	print_and_clean(1, welcome_msg, max_len);
 	
-	while (1) {
+	while (true) {
 		char* input = "";
 		readline(0, input, max_len);
 		int flag = compare(input, "quit");
@@ -134,6 +134,6 @@ void main(void)
 			print_and_clean(1, input, max_len);
 		}
 	}
-	
+	*/
 	
 }
