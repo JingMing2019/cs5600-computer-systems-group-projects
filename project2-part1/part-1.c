@@ -94,6 +94,7 @@ void print_and_clean(int fd, void *ptr, int max_len) {
 
 	/* add your code here*/
 	// Cast the void* pointer to char* pointer, to increment it by 1 byte later.
+	/*
 	char *temp = (char *)ptr;
 
 	for(int i = 0; i < max_len; i++) {
@@ -109,6 +110,7 @@ void print_and_clean(int fd, void *ptr, int max_len) {
 		// Increment the char* pointer by 1 byte.
 		temp++;
 	}
+	*/	
 }
 
 
@@ -128,7 +130,6 @@ int compare(char* x, char* y) {
 	}
 	return flag;
 }
-
 
 
 void main(void)
