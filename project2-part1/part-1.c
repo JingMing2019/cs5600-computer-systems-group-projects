@@ -94,7 +94,7 @@ void print_and_clean(int fd, void *ptr, int max_len) {
 
 	/* add your code here*/
 	// Cast the void* pointer to char* pointer, to increment it by 1 byte later.
-	char *temp = (void *)ptr;
+	char *temp = (char *)ptr;
 
 	for(int i = 0; i < max_len; i++) {
 		// Call write() to print 1 byte at a time.
@@ -105,7 +105,7 @@ void print_and_clean(int fd, void *ptr, int max_len) {
 			exit(1);
 		}
 		// Clean the buffer location. Replacing the printed character by "\0".
-		*temp = "\0";
+		temp[i] = '\0';
 		// Increment the char* pointer by 1 byte.
 		temp++;
 	}
