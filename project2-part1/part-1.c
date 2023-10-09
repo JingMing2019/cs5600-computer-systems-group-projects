@@ -63,22 +63,22 @@ void readline(int fd, void *ptr, int max_len) {
 
 	/* add your code here*/
 	char *buffer = (char *)ptr; // cast void pointer to character pointer buffer
-    	char temp; // temporarily hold the character read from the input
-    	int position = 0; // track the number of characters have been read
+  	char temp; // temporarily hold the character read from the input
+	int position = 0; // track the number of characters have been read
 
-    	while (position < max_len - 1) {
-        	int n = read(fd, &temp, 1); // read one character from fd each time
-        	if (n < 0) {
-            		exit(1); // error occurred during reading
-        	} else if (n == 0 || temp == '\n') {
-            		break; // end of input or end of line
-        	} else {
-            		buffer[position] = temp;
-            		position++;
-        	}
-    	}	
+	while (position < max_len) {
+   		int n = read(fd, &temp, 1); // read one character from fd each time
+    		if (n < 0) {
+      			exit(1); // error occurred during reading
+  		} else if (n == 0 || temp == '\n') {
+      			break; // end of input or end of line
+   		} else {
+      			buffer[position] = temp;
+      			position++;
+    		}
+	}	
 
-    	buffer[position] = '\0'; // terminate the string
+	buffer[position] = '\0'; // terminate the string
 }
 
 	
@@ -93,27 +93,30 @@ void print_and_clean(int fd, void *ptr, int max_len) {
 	/* add your code here*/
 	// Cast the void* pointer to char* pointer, to increment it by 1 byte later.
 	char *buffer = (char *)ptr;
+	// Hold the current character to be printed.
 	char temp;
 	int position = 0;
 
-	while (position < max_len - 1) {
+	while (position < max_len) {
 		temp = buffer[position];
-		// Call write() to print 1 byte at a time.
-		int written = write(fd, &temp, 1);
-		// If write() function return -1, means error occurs when writing a char
-		// to stdout, exit to terminate the process. exit(1) means exit with error.
-		if (written < 0) {
+		// Call write() to print 1 character at a time.
+		int written_return_val = write(fd, &temp, 1);
+		// If write() function returns -1 or (< 0), means error occurs in writing 
+		// a char to stdout, exit to terminate the process. 
+		if (written_return_val < 0) {
+			// exit(1) means exit with error.
 			exit(1);
-		} else if (written == 0 || temp == '\0') {
+		} else if (temp == '\0') {
+			// Else if reaches the end of line, break.
 			break;
 		} else {
+			// Otherwise, write sucessfully. 
 			// Clean the buffer location. Replacing the printed character by "0".
 			buffer[position] = '0';
 			// Increment the position by 1.
 			position++;
 		}
 	}
-	buffer[position] = '\0';
 } 
 
 
@@ -147,21 +150,22 @@ void main(void)
 	   string comparisons, or malloc for allocating memory).   */
 
 	/* add your code here */
-	
 	char welcome_msg[] = "Hello, type lines of input, or 'quit'\n";
 	int max_len = 200;
 	print_and_clean(1, welcome_msg, max_len);
 
 	while (1) {
+		char input_intro[] = "> ";
+		print_and_clean(1, input_intro, max_len);
 		char input[] = "";
-		readline(0, &input, max_len);
+		readline(0, input, max_len);
 		int flag = compare(input, "quit");
 		if (flag == 0) {
 			exit(2);
 		} else {
-			char intro_msg[] = "you typed: ";
-			print_and_clean(1, intro_msg, max_len);
-			print_and_clean(1, &input, max_len);
+			char print_intro[] = "you typed: ";
+			print_and_clean(1, print_intro, max_len);
+			print_and_clean(1, input, max_len);
 			char next_line[] = "\n";
 			print_and_clean(1, next_line, max_len);
 		}
