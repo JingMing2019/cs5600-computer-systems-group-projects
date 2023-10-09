@@ -63,19 +63,19 @@ void readline(int fd, void *ptr, int max_len) {
 
 	/* add your code here*/
 	char *buffer = (char *)ptr; // cast void pointer to character pointer buffer
-  char temp; // temporarily hold the character read from the input
+  	char temp; // temporarily hold the character read from the input
 	int position = 0; // track the number of characters have been read
 
 	while (position < max_len) {
-    int n = read(fd, &temp, 1); // read one character from fd each time
-    if (n < 0) {
-      exit(1); // error occurred during reading
-    } else if (n == 0 || temp == '\n') {
-      break; // end of input or end of line
-   	} else {
-      buffer[position] = temp;
-      position++;
-    }
+   		int n = read(fd, &temp, 1); // read one character from fd each time
+    		if (n < 0) {
+      			exit(1); // error occurred during reading
+  		} else if (n == 0 || temp == '\n') {
+      			break; // end of input or end of line
+   		} else {
+      			buffer[position] = temp;
+      			position++;
+    		}
 	}	
 
 	buffer[position] = '\0'; // terminate the string
