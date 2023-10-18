@@ -82,8 +82,37 @@ int munmap(void *addr, int len){
  */
 
 /* your code here */
-void do_readline(char *buf, int len);
-void do_print(char *buf);
+void do_readline(char *buf, int len) {
+	return len;
+}
+
+
+void do_print(char *buf) {
+	// Initialize position as the starter point in buffer.
+	int position = 0;
+	// Hold the current character to be printed.
+	char temp = buf[position];
+
+	// If `temp` points to '\0', means reaching the end of print line, stop.
+	while (temp != '\0') {
+		// Call write() to print 1 byte at a time. 
+		// Pass file descriptor 1 (used for stdout) to write() function. 
+		int written_return_val = write(1, &temp, 1);
+		// If write() function returns -1 or (< 0), means an error occured in
+		// writing a character to stdout, exit to terminate the process. 
+		if (written_return_val < 0) {
+			// exit(1) means exit with error.
+			exit(1);
+		} else {
+			// Otherwise, write sucessfully. 
+			// Increment the position by 1. And update value held by temp.
+			position++;
+			temp = buf[position];
+		}
+	}
+}
+
+
 char *do_getarg(int i) {
 	if (g_argv[i] == NULL) return 0;
 	return g_argv[i];
@@ -148,4 +177,8 @@ void main(void)
 
 	/* YOUR CODE HERE AS DESCRIBED IN THE FILE DESCRIPTION*/
 	/* When the user enters an executable_file, the main function should call exec(executable_file) */
+
+	// // Test do_print
+	// char *msg = "test\n";
+	// do_print(msg);
 }
