@@ -15,18 +15,54 @@ int g_argc;
 
 /* write these functions
 */
-int read(int fd, void *ptr, int len);           //done in part1
-int write(int fd, void *ptr, int len);          //done in part1
-void exit(int err);                             //done in part1
+
+/*The read function is given to you in the starter code, by analogy write the
+  write() function and the exit() function. 
+  __NR_read is defined in file sysdefs.h, it is the system call number 
+  for the system function that performs reading. 
+    A link is provided after each function, to read about this system call function
+  in the Linux manual page */
+int read(int fd, void *ptr, int len) {
+	if (len < 0) {
+		return -1;
+	}
+
+	return syscall(__NR_read, fd, ptr, len);
+} /*https://man7.org/linux/man-pages/man2/read.2.html */
+
+
+/* __NR_write is defined in file sysdefs.h, it is the system call number
+		for the system function that performs writing.*/
+int write(int fd, void *ptr, int len){
+	/* add your code here*/
+	if (len < 0) {
+		return -1;
+	}
+
+	return syscall(__NR_write, fd, ptr, len);
+} /* https://man7.org/linux/man-pages/man2/write.2.html */
+
+
+void exit(int err){
+	/* add your code here*/
+
+	syscall(__NR_exit, err);
+} /* https://man7.org/linux/man-pages/man2/exit.2.html */
+
 int open(char *path, int flags);
 int close(int fd);
+
 int lseek(int fd, int offset, int flag);
+
+
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset){
 	if (len < 0) {
 		return -1;
 	}
 	return syscall(__NR_munmap, addr, len, prot, flags, fd, offset);
 };
+
+
 int munmap(void *addr, int len){
 	if (len < 0) {
 		return -1;
