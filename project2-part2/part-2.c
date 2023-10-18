@@ -8,10 +8,12 @@
 #include "sysdefs.h"
 
 extern void *vector[];
+char** g_argv[10];
+int g_argc;
 
 /* ---------- */
 
-/* write these functions 
+/* write these functions
 */
 int read(int fd, void *ptr, int len);           //done in part1
 int write(int fd, void *ptr, int len);          //done in part1
@@ -19,15 +21,25 @@ void exit(int err);                             //done in part1
 int open(char *path, int flags);
 int close(int fd);
 int lseek(int fd, int offset, int flag);
-void *mmap(void *addr, int len, int prot, int flags, int fd, int offset);
-int munmap(void *addr, int len);
+void *mmap(void *addr, int len, int prot, int flags, int fd, int offset){
+	if (len < 0) {
+		return -1;
+	}
+	return syscall(__NR_munmap, addr, len, prot, flags, fd, offset);
+};
+int munmap(void *addr, int len){
+	if (len < 0) {
+		return -1;
+	}
+	return syscall(__NR_mmap, addr, len);
+};
 
 /* ---------- */
 
-/* Write the three 'system call' functions - do_readline, do_print, do_getarg 
+/* Write the three 'system call' functions - do_readline, do_print, do_getarg
  * Adjust the functions readline and print-and-clean functions written in part 1, to obtain
  * the 'system call' functions do_readline and do_print
- * hints: 
+ * hints:
  *  - read() or write() one byte at a time. It's OK to be slow.
  *  - stdin is file desc. 0, stdout is file descriptor 1
  *  - use global variables for getarg
@@ -36,7 +48,10 @@ int munmap(void *addr, int len);
 /* your code here */
 void do_readline(char *buf, int len);
 void do_print(char *buf);
-char *do_getarg(int i);         
+char *do_getarg(int i) {
+	if (g_argv[i] == NULL) return 0;
+	return g_argv[i];
+};
 
 /* ---------- */
 
@@ -87,10 +102,10 @@ int split(char **argv, int max_argc, char *line)
 
 /* ---------- */
 void main(void)
-{   // The vector array is defined as a global array. It plays the role of a system call vector table 
+{   // The vector array is defined as a global array. It plays the role of a system call vector table
 	// (similar to the interrupt vector table seen in class). Each entry in this array/table holds the address
 	// of the corresponding system function. Check out call-vector.S and Makefile to see how the vector table is built.
-	
+
 	vector[0] = do_readline;
 	vector[1] = do_print;
 	vector[2] = do_getarg;
@@ -98,4 +113,3 @@ void main(void)
 	/* YOUR CODE HERE AS DESCRIBED IN THE FILE DESCRIPTION*/
 	/* When the user enters an executable_file, the main function should call exec(executable_file) */
 }
-
