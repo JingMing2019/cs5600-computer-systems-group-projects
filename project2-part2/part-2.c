@@ -83,7 +83,29 @@ int munmap(void *addr, int len){
 
 /* your code here */
 void do_readline(char *buf, int len) {
-	return len;
+	// initialize position to track the position of the buffer
+	int position = 0;
+	// temporarily hold the character read from the input
+	char temp = buf[position];
+
+	while (position < len) {
+		// call read() function to read one byte from input each time
+		// stdin is file descriptor 0
+ 		int read_return_val = read(0, &temp, 1);
+ 		// error occurred during reading
+  		if (read_return_val < 0) {
+    			exit(1);
+    		// stop reading into buf[] when reach the end of input or end of line
+		} else if (read_return_val == 0 || temp == '\n') {
+    			break;
+    		// read 1 byte each time into buf[]
+ 		} else {
+			position++;
+			temp = buf[position];
+  		}
+	}
+	// terminate the string
+	buf[position] = '\0';
 }
 
 
