@@ -57,7 +57,11 @@ int close(int fd){
 	return syscall(__NR_close, fd);
 }
 
-int lseek(int fd, int offset, int flag);
+/* Used to change the location of the read/write pointer of a file descipter.
+Argument `flag` defines where to add the offset to the file descripter. */
+int lseek(int fd, int offset, int flag) {
+	return syscall(__NR_lseek, fd, offset, flag);
+} /* https://man7.org/linux/man-pages/man2/lseek.2.html */
 
 
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset){
@@ -115,16 +119,18 @@ void do_readline(char *buf, int len) {
 
 
 void do_print(char *buf) {
+	if (buf == NULL) {
+		exit(1);
+	}
+
 	// Initialize position as the starter point in buffer.
 	int position = 0;
-	// Hold the current character to be printed.
-	char temp = buf[position];
 
 	// If `temp` points to '\0', means reaching the end of print line, stop.
-	while (temp != '\0') {
+	while (buf[position] != '\0') {
 		// Call write() to print 1 byte at a time. 
 		// Pass file descriptor 1 (used for stdout) to write() function. 
-		int written_return_val = write(1, &temp, 1);
+		int written_return_val = write(1, &buf[position], 1);
 		// If write() function returns -1 or (< 0), means an error occured in
 		// writing a character to stdout, exit to terminate the process. 
 		if (written_return_val < 0) {
@@ -132,9 +138,8 @@ void do_print(char *buf) {
 			exit(1);
 		} else {
 			// Otherwise, write sucessfully. 
-			// Increment the position by 1. And update value held by temp.
+			// Increment the position by 1.
 			position++;
-			temp = buf[position];
 		}
 	}
 }
@@ -206,6 +211,8 @@ void main(void)
 	/* When the user enters an executable_file, the main function should call exec(executable_file) */
 
 	// // Test do_print
-	// char *msg = "test\n";
+	// char msg[] = "test\n";
 	// do_print(msg);
+
+	exit(0);
 }
