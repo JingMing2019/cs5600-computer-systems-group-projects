@@ -49,8 +49,13 @@ void exit(int err){
 	syscall(__NR_exit, err);
 } /* https://man7.org/linux/man-pages/man2/exit.2.html */
 
-int open(char *path, int flags);
-int close(int fd);
+int open(char *path, int flags){
+	return syscall(__NR_open, path, flags);
+}
+
+int close(int fd){
+	return syscall(__NR_close, fd);
+}
 
 int lseek(int fd, int offset, int flag);
 
