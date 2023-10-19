@@ -49,7 +49,7 @@ int munmap(void *addr, int len){
 void do_readline(char *buf, int len);
 void do_print(char *buf);
 char *do_getarg(int i) {
-	if (g_argv[i] == NULL) return 0;
+	if (i + 1 > g_argc) return 0;
 	return g_argv[i];
 };
 
@@ -112,4 +112,17 @@ void main(void)
 
 	/* YOUR CODE HERE AS DESCRIBED IN THE FILE DESCRIPTION*/
 	/* When the user enters an executable_file, the main function should call exec(executable_file) */
+
+	while(1) {
+		char input_intro[] = "> ";
+		vector[1](input_intro);
+		char buffer[200];
+		vector[0](buffer);
+		argc = split(g_argv, 10, buffer);
+		int flag = compare(vector[2](0), "quit");
+		if (flag == 0) {
+			exit(2);
+		}
+	}
+
 }
