@@ -15,18 +15,54 @@ int g_argc;
 
 /* write these functions
 */
-int read(int fd, void *ptr, int len);           //done in part1
-int write(int fd, void *ptr, int len);          //done in part1
-void exit(int err);                             //done in part1
+
+/*The read function is given to you in the starter code, by analogy write the
+  write() function and the exit() function.
+  __NR_read is defined in file sysdefs.h, it is the system call number
+  for the system function that performs reading.
+    A link is provided after each function, to read about this system call function
+  in the Linux manual page */
+int read(int fd, void *ptr, int len) {
+	if (len < 0) {
+		return -1;
+	}
+
+	return syscall(__NR_read, fd, ptr, len);
+} /*https://man7.org/linux/man-pages/man2/read.2.html */
+
+
+/* __NR_write is defined in file sysdefs.h, it is the system call number
+		for the system function that performs writing.*/
+int write(int fd, void *ptr, int len){
+	/* add your code here*/
+	if (len < 0) {
+		return -1;
+	}
+
+	return syscall(__NR_write, fd, ptr, len);
+} /* https://man7.org/linux/man-pages/man2/write.2.html */
+
+
+void exit(int err){
+	/* add your code here*/
+
+	syscall(__NR_exit, err);
+} /* https://man7.org/linux/man-pages/man2/exit.2.html */
+
 int open(char *path, int flags);
 int close(int fd);
+
 int lseek(int fd, int offset, int flag);
+
+
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset){
 	if (len < 0) {
 		return -1;
 	}
 	return syscall(__NR_munmap, addr, len, prot, flags, fd, offset);
 };
+
+
 int munmap(void *addr, int len){
 	if (len < 0) {
 		return -1;
@@ -46,8 +82,37 @@ int munmap(void *addr, int len){
  */
 
 /* your code here */
-void do_readline(char *buf, int len);
-void do_print(char *buf);
+void do_readline(char *buf, int len) {
+	return len;
+}
+
+
+void do_print(char *buf) {
+	// Initialize position as the starter point in buffer.
+	int position = 0;
+	// Hold the current character to be printed.
+	char temp = buf[position];
+
+	// If `temp` points to '\0', means reaching the end of print line, stop.
+	while (temp != '\0') {
+		// Call write() to print 1 byte at a time.
+		// Pass file descriptor 1 (used for stdout) to write() function.
+		int written_return_val = write(1, &temp, 1);
+		// If write() function returns -1 or (< 0), means an error occured in
+		// writing a character to stdout, exit to terminate the process.
+		if (written_return_val < 0) {
+			// exit(1) means exit with error.
+			exit(1);
+		} else {
+			// Otherwise, write sucessfully.
+			// Increment the position by 1. And update value held by temp.
+			position++;
+			temp = buf[position];
+		}
+	}
+}
+
+
 char *do_getarg(int i) {
 	if (i + 1 > g_argc) return 0;
 	return g_argv[i];
@@ -113,16 +178,7 @@ void main(void)
 	/* YOUR CODE HERE AS DESCRIBED IN THE FILE DESCRIPTION*/
 	/* When the user enters an executable_file, the main function should call exec(executable_file) */
 
-	while(1) {
-		char input_intro[] = "> ";
-		vector[1](input_intro);
-		char buffer[200];
-		vector[0](buffer);
-		argc = split(g_argv, 10, buffer);
-		int flag = compare(vector[2](0), "quit");
-		if (flag == 0) {
-			exit(2);
-		}
-	}
-
+	// // Test do_print
+	// char *msg = "test\n";
+	// do_print(msg);
 }
