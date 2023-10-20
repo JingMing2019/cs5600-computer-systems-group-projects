@@ -97,7 +97,7 @@ void do_readline(char *buf, int len) {
 	// temporarily hold the character read from the input
 	char temp = buf[position];
 
-	while (position < len) {
+	while (position < len - 1) {
 		// call read() function to read one byte from input each time
 		// stdin is file descriptor 0
  		int read_return_val = read(0, &temp, 1);
@@ -213,6 +213,10 @@ void main(void)
 	// // Test do_print
 	// char msg[] = "test\n";
 	// do_print(msg);
+	
+	// int len = 200;
+	// char buf[len];
+	// do_readline(buf, len);
 
 	exit(0);
 }
