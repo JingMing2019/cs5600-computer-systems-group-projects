@@ -194,7 +194,25 @@ int split(char **argv, int max_argc, char *line)
 *
 *               your code here
 */
+void exec(char* filename) {
+	// Define file descripter.
+	int fd;
 
+	// Open the file specified by filename and store its file descriptor to fd.
+	// If we cannot open this file, exit with failure code 1.
+	if ((fd = open(filename, O_RDONLY)) < 0) {
+		exit(1);
+	}
+
+	// Read the ELF main header. This struct is defined in the elf64.h file.
+	struct elf64_ehdr e_hdr;
+	read(fd, &e_hdr, sizeof(e_hdr));
+	// do_print((char *)e_hdr.e_entry);
+
+	// // Read the ELF program header.
+	// int n = e_hddr.e_phnum;
+	// struct elf64_phdr p_hdrs[n];
+}
 
 
 /* ---------- */
@@ -217,6 +235,9 @@ void main(void)
 	// int len = 200;
 	// char buf[len];
 	// do_readline(buf, len);
+
+	// // Test exec
+	// exec("hello");
 
 	exit(0);
 }
