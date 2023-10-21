@@ -66,7 +66,7 @@ int lseek(int fd, int offset, int flag) {
 
 
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset){
-	return (void*)syscall(__NR_munmap, addr, len, prot, flags, fd, offset);
+	return (void*)syscall(__NR_mmap, addr, len, prot, flags, fd, offset);
 };
 
 
@@ -290,29 +290,33 @@ void main(void)
 	// char msg[] = "test\n";
 	// do_print(msg);
 
-	/*
-	while(1) {
-		// print out user prompt
-		char *input_intro = "> ";
-		do_print(input_intro);
-		// buffer to read line
-		char buffer[200];
-		do_readline(buffer);
-		// local argv to store split reasult
-		char *local_argv[10];
-		g_argc = split(local_argv, 10, buffer);
-		// assign local to global
-		g_argv = local_argv
-		// compare first argument to quit
-		char *filename = do_getarg(0);
-		int flag = compare(filename, "quit");
-		if (flag == 0) {
-			exit(2);
-		} else {
-			exec(filename);
-		}
-	}
-	*/
+	char buffer[200];
+	do_readline(buffer, 200);
+	do_print(buffer);
 
+	// while(1) {
+		// print out user prompt
+		// char input_intro[] = "> ";
+		// do_print(input_intro);
+		// buffer to read line
+		// char buffer[] = "";
+		// do_readline(buffer, 200);
+		// local argv to store split reasult
+		//char *local_argv[10];
+		//g_argc = split(local_argv, 10, buffer);
+		// assign local to global
+		//g_argv = local_argv;
+		// compare first argument to quit
+		//char* filename = do_getarg(0);
+		//int flag = compare(filename, "quit");
+		// if (flag == 0) {
+		// 	exit(2);
+		// } else {
+		// 	// exec(filename);
+		// 	do_print(filename);
+		// }
+	// }
+
+	// exec("hello");
 	exit(0);
 }
