@@ -93,8 +93,9 @@ void do_readline(char *buf, int len) {
 	// initialize position to track the position of the buffer
 	int position = 0;
 	// temporarily hold the character read from the input
-	char temp = buf[position];
+	char temp;
 
+	// reads up to n-1 bytes into buf[0], buf[1],...
 	while (position < len - 1) {
 		// call read() function to read one byte from input each time
 		// stdin is file descriptor 0
@@ -107,8 +108,8 @@ void do_readline(char *buf, int len) {
     			break;
     		// read 1 byte each time into buf[]
  		} else {
+			buf[position] = temp;
 			position++;
-			temp = buf[position];
   		}
 	}
 	// terminate the string
@@ -218,27 +219,26 @@ void exec(char* filename) {
 	unsigned int offset = 0x80000000;
 
 	// Define two lists to store the allocated memory addresses and theri lengths.
-	void **allocated_addr[n];
+	char *allocated_addr[n];
 	int allocated_len[n];
 
 	// Read loadable program segment and load it to memory
 	for(int i = 0; i < hdr.e_phnum; i++) {
 		if (phdrs[i].p_type == PT_LOAD) {
-			int len = ROUND_UP(phdrs[i].p_memsz, 4096);
+			allocated_len[i] = ROUND_UP(phdrs[i].p_memsz, 4096);
 			// Use mmap(void *addr, int len, int prot, int flags, int fd, int offset)
 			// to allocate memory for each segment
-			void *buf = mmap(phdrs[i].p_vaddr + offset, len,
+			long addr = ROUND_DOWN((long) phdrs[i].p_vaddr, 4096);
+			allocated_addr[i] = (char *)mmap((void *)addr + offset, allocated_len[i],
 				PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
-			if (buf == MAP_FAILED) {
+			if (allocated_addr[i] == MAP_FAILED) {
 				do_print("mmap failed\n");
 				exit(1);
 			}
-			allocated_addr[i] = buf;
-			allocated_len[i] = len;
 			// phdrs[i].p_offset is the offset of the segment in the executable.
 			// read segment.  hdr.e_phoff + phdrs[i].p_offset
 			lseek(fd, (int)phdrs[i].p_offset, SEEK_SET);
-			read(fd, buf, (int)phdrs[i].p_filesz);
+			read(fd, allocated_addr[i], (int)phdrs[i].p_filesz);
 		}
 	}
 
@@ -249,7 +249,9 @@ void exec(char* filename) {
 
 	// munmap each mmap'ed region so we don't crash the 2nd time
 	for (int i = 0; i < hdr.e_phnum; i++) {
-		munmap(allocated_addr[i], allocated_len[i]);
+		if (phdrs[i].p_type == PT_LOAD) {
+			munmap(allocated_addr[i], allocated_len[i]);
+		}
 	}
 
 	close(fd);
@@ -290,33 +292,38 @@ void main(void)
 	// char msg[] = "test\n";
 	// do_print(msg);
 
-	char buffer[200];
-	do_readline(buffer, 200);
-	do_print(buffer);
+	// test do_readline
+	int len = 200;
+	char buf[len];
+	do_readline(buf, len);
+	do_print(buf);
+	do_print("\n");
 
-	// while(1) {
+	/*
+	while(1) {
 		// print out user prompt
-		// char input_intro[] = "> ";
-		// do_print(input_intro);
+		char *input_intro = "> ";
+		do_print(input_intro);
 		// buffer to read line
-		// char buffer[] = "";
-		// do_readline(buffer, 200);
+		char buffer[200];
+		do_readline(buffer);
 		// local argv to store split reasult
-		//char *local_argv[10];
-		//g_argc = split(local_argv, 10, buffer);
+		char *local_argv[10];
+		g_argc = split(local_argv, 10, buffer);
 		// assign local to global
-		//g_argv = local_argv;
+		g_argv = local_argv
 		// compare first argument to quit
-		//char* filename = do_getarg(0);
-		//int flag = compare(filename, "quit");
-		// if (flag == 0) {
-		// 	exit(2);
-		// } else {
-		// 	// exec(filename);
-		// 	do_print(filename);
-		// }
-	// }
+		char *filename = do_getarg(0);
+		int flag = compare(filename, "quit");
+		if (flag == 0) {
+			exit(2);
+		} else {
+			exec(filename);
+		}
+	}
+	*/
 
-	// exec("hello");
+	exec("hello");
+
 	exit(0);
 }
