@@ -66,7 +66,7 @@ int lseek(int fd, int offset, int flag) {
 
 
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset){
-	return (void*)syscall(__NR_munmap, addr, len, prot, flags, fd, offset);
+	return (void*)syscall(__NR_mmap, addr, len, prot, flags, fd, offset);
 };
 
 
@@ -218,27 +218,26 @@ void exec(char* filename) {
 	unsigned int offset = 0x80000000;
 
 	// Define two lists to store the allocated memory addresses and theri lengths.
-	void **allocated_addr[n];
+	char *allocated_addr[n];
 	int allocated_len[n];
 
 	// Read loadable program segment and load it to memory
 	for(int i = 0; i < hdr.e_phnum; i++) {
 		if (phdrs[i].p_type == PT_LOAD) {
-			int len = ROUND_UP(phdrs[i].p_memsz, 4096);
+			allocated_len[i] = ROUND_UP(phdrs[i].p_memsz, 4096);
 			// Use mmap(void *addr, int len, int prot, int flags, int fd, int offset)
 			// to allocate memory for each segment
-			void *buf = mmap(phdrs[i].p_vaddr + offset, len,
+			long addr = ROUND_DOWN((long) phdrs[i].p_vaddr, 4096);
+			allocated_addr[i] = (char *)mmap((void *)addr + offset, allocated_len[i], 
 				PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
-			if (buf == MAP_FAILED) {
+			if (allocated_addr[i] == MAP_FAILED) {
 				do_print("mmap failed\n");
 				exit(1);
 			}
-			allocated_addr[i] = buf;
-			allocated_len[i] = len;
 			// phdrs[i].p_offset is the offset of the segment in the executable.
 			// read segment.  hdr.e_phoff + phdrs[i].p_offset
 			lseek(fd, (int)phdrs[i].p_offset, SEEK_SET);
-			read(fd, buf, (int)phdrs[i].p_filesz);
+			read(fd, allocated_addr[i], (int)phdrs[i].p_filesz);
 		}
 	}
 
@@ -249,7 +248,9 @@ void exec(char* filename) {
 
 	// munmap each mmap'ed region so we don't crash the 2nd time
 	for (int i = 0; i < hdr.e_phnum; i++) {
-		munmap(allocated_addr[i], allocated_len[i]);
+		if (phdrs[i].p_type == PT_LOAD) {
+			munmap(allocated_addr[i], allocated_len[i]);
+		}
 	}
 
 	close(fd);
@@ -313,6 +314,8 @@ void main(void)
 		}
 	}
 	*/
+
+	exec("hello");
 
 	exit(0);
 }
