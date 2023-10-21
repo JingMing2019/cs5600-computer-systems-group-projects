@@ -8,7 +8,7 @@
 #include "sysdefs.h"
 
 extern void *vector[];
-char** g_argv[10];
+char** g_argv;
 int g_argc;
 
 /* ---------- */
@@ -22,6 +22,7 @@ int g_argc;
   for the system function that performs reading.
     A link is provided after each function, to read about this system call function
   in the Linux manual page */
+
 int read(int fd, void *ptr, int len) {
 	if (len < 0) {
 		return -1;
@@ -40,7 +41,7 @@ int write(int fd, void *ptr, int len){
 	}
 
 	return syscall(__NR_write, fd, ptr, len);
-} /* https://man7.org/linux/man-pages/man2/write.2.html */
+}/* https://man7.org/linux/man-pages/man2/write.2.html */
 
 
 void exit(int err){
@@ -56,10 +57,7 @@ int lseek(int fd, int offset, int flag);
 
 
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset){
-	if (len < 0) {
-		return -1;
-	}
-	return syscall(__NR_munmap, addr, len, prot, flags, fd, offset);
+	return (void*)syscall(__NR_munmap, addr, len, prot, flags, fd, offset);
 };
 
 
@@ -114,7 +112,7 @@ void do_print(char *buf) {
 
 
 char *do_getarg(int i) {
-	if (i + 1 > g_argc) return 0;
+	if (i + 1 > g_argc) return NULL;
 	return g_argv[i];
 };
 
@@ -163,6 +161,22 @@ int split(char **argv, int max_argc, char *line)
 *               your code here
 */
 
+int compare(char* x, char* y) {
+	int flag = 0;
+	while (*x != '\0' || *y != '\0') {
+		if (*x == *y) {
+			x++;
+			y++;
+		}
+		else if ((*x == '\0' && *y != '\0')
+			|| (*x != '\0' && *y == '\0')
+			|| *x != *y) {
+			flag = 1;
+			break;
+		}
+	}
+	return flag;
+}
 
 
 /* ---------- */
@@ -181,4 +195,29 @@ void main(void)
 	// // Test do_print
 	// char *msg = "test\n";
 	// do_print(msg);
+
+	/*
+	while(1) {
+		// print out user prompt
+		char *input_intro = "> ";
+		do_print(input_intro);
+		// buffer to read line
+		char buffer[200];
+		do_readline(buffer);
+		// local argv to store split reasult
+		char *local_argv[10];
+		g_argc = split(local_argv, 10, buffer);
+		// assign local to global
+		g_argv = local_argv
+		// compare first argument to quit
+		char *filename = do_getarg(0);
+		int flag = compare(filename, "quit");
+		if (flag == 0) {
+			exit(2);
+		} else {
+			exec(filename);
+		}
+	}
+	*/
+
 }
