@@ -50,6 +50,7 @@ int main(void)
 		if (string_contains(pattern, buf)) {
 			print("-- ");
 			print(buf);
+			print("\n");
 		}
 	}
 	return 0;
