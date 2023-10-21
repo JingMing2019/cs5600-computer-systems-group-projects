@@ -293,27 +293,28 @@ void main(void)
 	// do_print(msg);
 
 	// test do_readline
-	int len = 200;
-	char buf[len];
-	do_readline(buf, len);
-	do_print(buf);
-	do_print("\n");
+	// int len = 200;
+	// char buf[len];
+	// do_readline(buf, len);
+	// do_print(buf);
+	// do_print("\n");
 
-	/*
+
 	while(1) {
 		// print out user prompt
 		char *input_intro = "> ";
 		do_print(input_intro);
 		// buffer to read line
 		char buffer[200];
-		do_readline(buffer);
+		do_readline(buffer, 200);
 		// local argv to store split reasult
 		char *local_argv[10];
 		g_argc = split(local_argv, 10, buffer);
 		// assign local to global
-		g_argv = local_argv
+		g_argv = local_argv;
 		// compare first argument to quit
-		char *filename = do_getarg(0);
+		char* filename = do_getarg(0);
+		// do_print(filename);
 		int flag = compare(filename, "quit");
 		if (flag == 0) {
 			exit(2);
@@ -321,9 +322,9 @@ void main(void)
 			exec(filename);
 		}
 	}
-	*/
 
-	exec("hello");
+
+	// exec("hello");
 
 	exit(0);
 }
