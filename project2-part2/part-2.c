@@ -93,8 +93,9 @@ void do_readline(char *buf, int len) {
 	// initialize position to track the position of the buffer
 	int position = 0;
 	// temporarily hold the character read from the input
-	char temp = buf[position];
+	char temp;
 
+	// reads up to n-1 bytes into buf[0], buf[1],...
 	while (position < len - 1) {
 		// call read() function to read one byte from input each time
 		// stdin is file descriptor 0
@@ -107,8 +108,8 @@ void do_readline(char *buf, int len) {
     			break;
     		// read 1 byte each time into buf[]
  		} else {
+			buf[position] = temp;
 			position++;
-			temp = buf[position];
   		}
 	}
 	// terminate the string
@@ -290,6 +291,13 @@ void main(void)
 	// // Test do_print
 	// char msg[] = "test\n";
 	// do_print(msg);
+
+	// test do_readline
+	int len = 200;
+	char buf[len];
+	do_readline(buf, len);
+	do_print(buf);
+	do_print("\n");
 
 	/*
 	while(1) {
