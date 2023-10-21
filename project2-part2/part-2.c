@@ -50,10 +50,19 @@ void exit(int err){
 	syscall(__NR_exit, err);
 } /* https://man7.org/linux/man-pages/man2/exit.2.html */
 
-int open(char *path, int flags);
-int close(int fd);
+int open(char *path, int flags){
+	return syscall(__NR_open, path, flags);
+}
 
-int lseek(int fd, int offset, int flag);
+int close(int fd){
+	return syscall(__NR_close, fd);
+}
+
+/* Used to change the location of the read/write pointer of a file descipter.
+Argument `flag` defines where to add the offset to the file descripter. */
+int lseek(int fd, int offset, int flag) {
+	return syscall(__NR_lseek, fd, offset, flag);
+} /* https://man7.org/linux/man-pages/man2/lseek.2.html */
 
 
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset){
@@ -65,7 +74,7 @@ int munmap(void *addr, int len){
 	if (len < 0) {
 		return -1;
 	}
-	return syscall(__NR_mmap, addr, len);
+	return syscall(__NR_munmap, addr, len);
 };
 
 /* ---------- */
@@ -81,21 +90,45 @@ int munmap(void *addr, int len){
 
 /* your code here */
 void do_readline(char *buf, int len) {
-	return len;
+	// initialize position to track the position of the buffer
+	int position = 0;
+	// temporarily hold the character read from the input
+	char temp = buf[position];
+
+	while (position < len - 1) {
+		// call read() function to read one byte from input each time
+		// stdin is file descriptor 0
+ 		int read_return_val = read(0, &temp, 1);
+ 		// error occurred during reading
+  		if (read_return_val < 0) {
+    			exit(1);
+    		// stop reading into buf[] when reach the end of input or end of line
+		} else if (read_return_val == 0 || temp == '\n') {
+    			break;
+    		// read 1 byte each time into buf[]
+ 		} else {
+			position++;
+			temp = buf[position];
+  		}
+	}
+	// terminate the string
+	buf[position] = '\0';
 }
 
 
 void do_print(char *buf) {
+	if (buf == NULL) {
+		exit(1);
+	}
+
 	// Initialize position as the starter point in buffer.
 	int position = 0;
-	// Hold the current character to be printed.
-	char temp = buf[position];
 
 	// If `temp` points to '\0', means reaching the end of print line, stop.
-	while (temp != '\0') {
+	while (buf[position] != '\0') {
 		// Call write() to print 1 byte at a time.
 		// Pass file descriptor 1 (used for stdout) to write() function.
-		int written_return_val = write(1, &temp, 1);
+		int written_return_val = write(1, &buf[position], 1);
 		// If write() function returns -1 or (< 0), means an error occured in
 		// writing a character to stdout, exit to terminate the process.
 		if (written_return_val < 0) {
@@ -103,9 +136,8 @@ void do_print(char *buf) {
 			exit(1);
 		} else {
 			// Otherwise, write sucessfully.
-			// Increment the position by 1. And update value held by temp.
+			// Increment the position by 1.
 			position++;
-			temp = buf[position];
 		}
 	}
 }
@@ -160,6 +192,69 @@ int split(char **argv, int max_argc, char *line)
 *
 *               your code here
 */
+void exec(char* filename) {
+	// Define file descripter.
+	int fd;
+
+	// Open the file specified by filename and store its file descriptor to fd.
+	// If we cannot open this file, exit with failure code 1.
+	if ((fd = open(filename, O_RDONLY)) < 0) {
+		do_print("file open failed.\n");
+		exit(1);
+	}
+
+	// Read the ELF main header. This struct is defined in the elf64.h file.
+	struct elf64_ehdr hdr;
+	read(fd, &hdr, sizeof(hdr));
+	// do_print((char *)hdr.e_entry);
+
+	// // Read the program header.
+	int n = hdr.e_phnum;
+	struct elf64_phdr phdrs[n];
+	lseek(fd, hdr.e_phoff, SEEK_SET);
+	read(fd, phdrs, sizeof(phdrs));
+
+	// Define offset value. This is equal to the base register pointer. EBP.
+	unsigned int offset = 0x80000000;
+
+	// Define two lists to store the allocated memory addresses and theri lengths.
+	void **allocated_addr[n];
+	int allocated_len[n];
+
+	// Read loadable program segment and load it to memory
+	for(int i = 0; i < hdr.e_phnum; i++) {
+		if (phdrs[i].p_type == PT_LOAD) {
+			int len = ROUND_UP(phdrs[i].p_memsz, 4096);
+			// Use mmap(void *addr, int len, int prot, int flags, int fd, int offset)
+			// to allocate memory for each segment
+			void *buf = mmap(phdrs[i].p_vaddr + offset, len,
+				PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+			if (buf == MAP_FAILED) {
+				do_print("mmap failed\n");
+				exit(1);
+			}
+			allocated_addr[i] = buf;
+			allocated_len[i] = len;
+			// phdrs[i].p_offset is the offset of the segment in the executable.
+			// read segment.  hdr.e_phoff + phdrs[i].p_offset
+			lseek(fd, (int)phdrs[i].p_offset, SEEK_SET);
+			read(fd, buf, (int)phdrs[i].p_filesz);
+		}
+	}
+
+	// function call to hdr.e_entry
+	void (*f)();
+	f = hdr.e_entry + offset;
+	f();
+
+	// munmap each mmap'ed region so we don't crash the 2nd time
+	for (int i = 0; i < hdr.e_phnum; i++) {
+		munmap(allocated_addr[i], allocated_len[i]);
+	}
+
+	close(fd);
+}
+
 
 int compare(char* x, char* y) {
 	int flag = 0;
@@ -178,7 +273,6 @@ int compare(char* x, char* y) {
 	return flag;
 }
 
-
 /* ---------- */
 void main(void)
 {   // The vector array is defined as a global array. It plays the role of a system call vector table
@@ -193,7 +287,7 @@ void main(void)
 	/* When the user enters an executable_file, the main function should call exec(executable_file) */
 
 	// // Test do_print
-	// char *msg = "test\n";
+	// char msg[] = "test\n";
 	// do_print(msg);
 
 	/*
@@ -220,4 +314,5 @@ void main(void)
 	}
 	*/
 
+	exit(0);
 }
