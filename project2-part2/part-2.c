@@ -65,10 +65,10 @@ int lseek(int fd, int offset, int flag) {
 
 
 void *mmap(void *addr, int len, int prot, int flags, int fd, int offset){
-	if (len < 0) {
-		return -1;
-	}
-	return syscall(__NR_munmap, addr, len, prot, flags, fd, offset);
+	// if (len < 0) {
+	// 	return -1;
+	// }
+	return syscall(__NR_mmap, addr, len, prot, flags, fd, offset);
 };
 
 
@@ -76,7 +76,7 @@ int munmap(void *addr, int len){
 	if (len < 0) {
 		return -1;
 	}
-	return syscall(__NR_mmap, addr, len);
+	return syscall(__NR_munmap, addr, len);
 };
 
 /* ---------- */
@@ -201,17 +201,60 @@ void exec(char* filename) {
 	// Open the file specified by filename and store its file descriptor to fd.
 	// If we cannot open this file, exit with failure code 1.
 	if ((fd = open(filename, O_RDONLY)) < 0) {
+		do_print("file open failed.\n");
 		exit(1);
 	}
 
 	// Read the ELF main header. This struct is defined in the elf64.h file.
-	struct elf64_ehdr e_hdr;
-	read(fd, &e_hdr, sizeof(e_hdr));
-	// do_print((char *)e_hdr.e_entry);
+	struct elf64_ehdr hdr;
+	read(fd, &hdr, sizeof(hdr));
+	// do_print((char *)hdr.e_entry);
 
-	// // Read the ELF program header.
-	// int n = e_hddr.e_phnum;
-	// struct elf64_phdr p_hdrs[n];
+	// // Read the program header.
+	int n = hdr.e_phnum;
+	struct elf64_phdr phdrs[n];
+	lseek(fd, hdr.e_phoff, SEEK_SET);
+	read(fd, phdrs, sizeof(phdrs));
+
+	// Define offset value. This is equal to the base register pointer. EBP.
+	unsigned int offset = 0x80000000;
+
+	// Define two lists to store the allocated memory addresses and theri lengths.
+	void **allocated_addr[n];
+	int allocated_len[n];
+
+	// Read loadable program segment and load it to memory
+	for(int i = 0; i < hdr.e_phnum; i++) {
+		if (phdrs[i].p_type == PT_LOAD) {
+			int len = ROUND_UP(phdrs[i].p_memsz, 4096);
+			// Use mmap(void *addr, int len, int prot, int flags, int fd, int offset)
+			// to allocate memory for each segment
+			void *buf = mmap(phdrs[i].p_vaddr + offset, len, 
+				PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+			if (buf == MAP_FAILED) {
+				do_print("mmap failed\n");
+				exit(1);
+			}
+			allocated_addr[i] = buf;
+			allocated_len[i] = len;
+			// phdrs[i].p_offset is the offset of the segment in the executable.
+			// read segment.  hdr.e_phoff + phdrs[i].p_offset
+			lseek(fd, (int)phdrs[i].p_offset, SEEK_SET);
+			read(fd, buf, (int)phdrs[i].p_filesz);
+		}
+	}
+
+	// function call to hdr.e_entry
+	void (*f)();
+	f = hdr.e_entry + offset;
+	f();
+
+	// munmap each mmap'ed region so we don't crash the 2nd time
+	for (int i = 0; i < hdr.e_phnum; i++) {
+		munmap(allocated_addr[i], allocated_len[i]);
+	}
+
+	close(fd);
 }
 
 
@@ -236,7 +279,9 @@ void main(void)
 	// char buf[len];
 	// do_readline(buf, len);
 
-	// // Test exec
+	// Test exec
+	exec("hello");
+
 	// exec("hello");
 
 	exit(0);
