@@ -1,6 +1,7 @@
 #include "stairs.h"
 #include <pthread.h>
 #include <semaphore.h>
+#include <sys/time.h>
 
 int upCount = 0;
 int downCount = 0;
@@ -44,23 +45,25 @@ void *threadfunction (void *vargp) {
     if (direction == 0) {
       if (downCount > 0) {
         printf("Customer %d going up should wait\n", id);
-        // release and then re-acquire?
+        sem_post(&sem);
+        sem_wait(&sem);
       }
       upCount++;
     } else {
       if (upCount > 0) {
         printf("Customer %d going down should wait\n", id);
-        // release and then re-acquire
+        sem_post(&sem);
+        sem_wait(&sem);
       }
       downCount++;
     }
 
     sem_post(&sem);
 
-    // start_time
+    time_t start_time = time(NULL);
     printf("Customer %d crossing the stairs now \n", id);
     sleep(rand() % 10);
-    // end_time
+    time_t end_time = time(NULL);
 
     sem_wait(&sem);
 
@@ -73,7 +76,8 @@ void *threadfunction (void *vargp) {
     sem_post(&sem);
     printf("Customer %d finished stairs \n", id);
 
-    // calculate turnaround time
+    time_t turnaround = end_time - start_time;
+    printf("turnaround time is %ld seconds\n", turnaround);
 
     pthread_exit(NULL);
 }
