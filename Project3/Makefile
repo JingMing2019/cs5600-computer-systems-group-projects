@@ -9,7 +9,7 @@ CFLAG = -I. -pthread -lrt
 
 stairs: stairs.h stairs.o
 	$(CC) -Wall -o $@ stairs.c $(CFLAG) 
-	./stairs > output.txt
+# 	./stairs > output.txt
 
 clean:
 	rm stairs.o stairs output.txt

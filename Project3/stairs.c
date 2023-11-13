@@ -133,18 +133,35 @@ int main(int argc, char *argv[]) {
         // Set direction as random 0 or 1.
         int rand_direction = rand() % 2;
         thread_arg_t args = {i, rand_direction};
-        pthread_create(&tid[i], NULL, threadfunction, &args);
+        if (pthread_create(&tid[i], NULL, threadfunction, &args)) {
+            printf("Error occurs in thread creation.");
+            exit(1);
+        }
         sleep(rand() % 100 + 1);
     }
 
   // your code here
 
+    time_t turnaround[num_customers];
 	// for each thread created, call pthread_join(..)
     for (int i = 0; i < num_customers; i++) {
+        time_t start_time = time(NULL);
         pthread_join(tid[i], NULL);
+        time_t end_time = time(NULL);
+        turnaround[i] = end_time - start_time;
     }
 
    // printf turnaround time for each thread and average turnaround time
+    double sum_turnaround;
+    for (int i = 0; i < num_customers; i++) {
+        printf("Thread %d turnaround time is %.4f seconds.\n", i, 
+            (double) turnaround[i]);
+        sum_turnaround += (double) turnaround[i];
+    }
+
+    double avg_turnaround = sum_turnaround / num_customers;
+    printf("Average turnaround time is %.4f seconds.\n", avg_turnaround);
+
 
   // free every pointer you used malloc for
     cleanup();
