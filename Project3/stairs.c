@@ -28,7 +28,7 @@ void sempost(sem_t *sem) {
     pthread_mutex_lock(&mutex);
     on_stairs--;
     if (on_stairs == 0) {
-        sem_post(sem) // Signal that the stairs are free
+        sem_post(sem); // Signal that the stairs are free
     }
     pthread_mutex_unlock(&mutex);
 }
@@ -91,26 +91,63 @@ void cleanup() {
 
 int main(int argc, char *argv[]) {
 
+    int num_customers = atoi(argv[1]);
+    int num_stairs = atoi(argv[2]);
 
-    //printf("Number of Customers: %d\nNumber of stairs: %d\n", ...., .....);
+    // // Prompt the user to input number of customers and stairs they would like
+    // // to test.
+    // printf("Enter number of customers (smaller or equal to %d):", MAX_CUSTOMERS);
+    // scanf("%d\n", &num_customers);
 
+    // printf("Enter number of stairs (smaller or euqal to %d):", MAX_STAIRS);
+    // scanf("%d\n", &num_stairs);
 
+    if (num_customers > MAX_CUSTOMERS) {
+        printf("Error Input %d. Number of customers should not exceed %d.\n", 
+            num_customers, MAX_CUSTOMERS);
+        exit(1);
+    }
 
-    // sem_init(.....);
+    if (num_stairs > MAX_STAIRS) {
+        printf("Error Input %d. Number of stairs should not exceed %d.\n", 
+            num_stairs, MAX_STAIRS);
+        exit(1);
+    }
+   
+    printf("Number of Customers: %d\nNumber of stairs: %d\n", num_customers, 
+        num_stairs);
+
+    // Initializes the semaphore. Set the pshared as 0 so that this semaphore is 
+    // shared between the threads of a process. Set value as `num_stairs` means
+    // initially there are `num_stairs` empty spaces for customers to use.
+    sem_init(&sem, 0, num_stairs);
+
 	// generate an array of threads, set their direction randomly, call pthread_create,
 	// then sleep for some random nonzero time
+
+    tid = (pthread_t *)malloc(sizeof(pthread_t) * num_customers);
+    // Seed the random number generator as current time.
+    srand(time(NULL));
+
+    for (int i = 0; i < num_customers; i++) {
+        // Set direction as random 0 or 1.
+        int rand_direction = rand() % 2;
+        thread_arg_t args = {i, rand_direction};
+        pthread_create(&tid[i], NULL, threadfunction, &args);
+        sleep(rand() % 100 + 1);
+    }
 
   // your code here
 
 	// for each thread created, call pthread_join(..)
-
-
-
+    for (int i = 0; i < num_customers; i++) {
+        pthread_join(tid[i], NULL);
+    }
 
    // printf turnaround time for each thread and average turnaround time
 
   // free every pointer you used malloc for
-
+    cleanup();
 
     return 0;
 }
