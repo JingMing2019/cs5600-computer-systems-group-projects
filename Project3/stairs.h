@@ -14,6 +14,8 @@
 typedef struct thread_arg {
     int index;
     int direction;  // 0 for up, 1 for down
+    struct timeval start_time; // to store the thread start time
+    struct timeval end_time; // to store the thread end time
 } thread_arg_t;
 
 // global constants

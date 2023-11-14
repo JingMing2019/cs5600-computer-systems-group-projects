@@ -37,6 +37,10 @@ void *threadfunction (void *vargp) {
     // write the threadfunction whose name should be part of pthread_create(..)
 	// Don't forget your timing computations
     thread_arg_t *t_arg = (thread_arg_t*)vargp;
+
+    // Record the start time.
+    gettimeofday(&t_arg->start_time, NULL);
+
     int id = t_arg->index;
     int direction = t_arg->direction;
 
@@ -60,10 +64,8 @@ void *threadfunction (void *vargp) {
 
     sempost(&sem);
 
-    // time_t start_time = time(NULL);
     printf("Customer %d crossing the stairs now \n", id);
     sleep(rand() % 10);
-    // time_t end_time = time(NULL);
 
     semwait(&sem);
 
@@ -76,8 +78,8 @@ void *threadfunction (void *vargp) {
     sempost(&sem);
     printf("Customer %d finished stairs \n", id);
 
-    // time_t turnaround = end_time - start_time;
-    // printf("turnaround time is %ld seconds\n", turnaround);
+    // Record the end time.
+    gettimeofday(&t_arg->end_time, NULL);
 
     pthread_exit(NULL);
 }
@@ -90,17 +92,9 @@ void cleanup() {
 }
 
 int main(int argc, char *argv[]) {
-
+    // Get number of customers and number of stairs from command-line arguments.
     int num_customers = atoi(argv[1]);
     int num_stairs = atoi(argv[2]);
-
-    // // Prompt the user to input number of customers and stairs they would like
-    // // to test.
-    // printf("Enter number of customers (smaller or equal to %d):", MAX_CUSTOMERS);
-    // scanf("%d\n", &num_customers);
-
-    // printf("Enter number of stairs (smaller or euqal to %d):", MAX_STAIRS);
-    // scanf("%d\n", &num_stairs);
 
     if (num_customers > MAX_CUSTOMERS) {
         printf("Error Input %d. Number of customers should not exceed %d.\n", 
@@ -124,48 +118,48 @@ int main(int argc, char *argv[]) {
 
 	// generate an array of threads, set their direction randomly, call pthread_create,
 	// then sleep for some random nonzero time
-
+    // Allocate memory for each thread.
     tid = (pthread_t *)malloc(sizeof(pthread_t) * num_customers);
+    // Define an array of thread arguments.
+    thread_arg_t args[num_customers];
     // Seed the random number generator as current time.
     srand(time(NULL));
-    time_t start_time[num_customers];
 
     for (int i = 0; i < num_customers; i++) {
+        // Set thread index as i.
+        args[i].index = i;
         // Set direction as random 0 or 1.
-        int rand_direction = rand() % 2;
-        thread_arg_t args = {i, rand_direction};
+        args[i].direction = rand() % 2;
         printf("Customer %d goes up or down (0 for up, 1 for down): %d\n", 
-            i, rand_direction);
-        if (pthread_create(&tid[i], NULL, threadfunction, &args)) {
+            args[i].index, args[i].direction);
+        if (pthread_create(&tid[i], NULL, threadfunction, (void *)&args[i])) {
             printf("Error occurs in thread creation.");
             exit(1);
         }
-        start_time[i] = time(NULL);
-        sleep(rand() % 5 + 1);
+        // Sleep for random 1 to 10 time.
+        sleep(rand() % 10 + 1);
     }
 
-
     // for each thread created, call pthread_join(..)
-    time_t end_time[num_customers];
     for (int i = 0; i < num_customers; i++) {
         pthread_join(tid[i], NULL);
-        end_time[i] = time(NULL);
     }
 
    // printf turnaround time for each thread and average turnaround time
-    time_t turnaround[num_customers];
-    double sum_turnaround;
+    long turnaround[num_customers];
+    // Initialize the sum of turnaround as 0.
+    long sum_turnaround = 0;
 
     for (int i = 0; i < num_customers; i++) {
-        turnaround[i] = end_time[i] - start_time[i];
-        printf("Customer %d turnaround time is %.4f seconds.\n", i, 
-            (double) turnaround[i]);
-        sum_turnaround += (double) turnaround[i];
+        turnaround[i] = (args[i].end_time.tv_sec - args[i].start_time.tv_sec) +
+         (args[i].end_time.tv_usec - args[i].start_time.tv_usec) * 1e-6;
+        printf("Customer %d turnaround time is %ld seconds.\n", i, 
+            turnaround[i]);
+        sum_turnaround += turnaround[i];
     }
 
-    double avg_turnaround = sum_turnaround / num_customers;
-    printf("Average turnaround time is %.4f seconds.\n", avg_turnaround);
-
+    long avg_turnaround = sum_turnaround / num_customers;
+    printf("Average turnaround time is %ld seconds.\n", avg_turnaround);
 
   // free every pointer you used malloc for
     cleanup();
