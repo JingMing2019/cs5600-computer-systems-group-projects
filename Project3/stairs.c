@@ -92,27 +92,34 @@ void cleanup() {
 }
 
 int main(int argc, char *argv[]) {
+    // Check if there contains enough input.
+    if (argc != 4) {
+        printf("Program needs 3 arguments. Number of customers, number of"
+         "stairs and seed for random number generation.\n");
+        exit(1);
+    }
+
     // Get number of customers and number of stairs from command-line arguments.
     int num_customers = atoi(argv[1]);
     int num_stairs = atoi(argv[2]);
     int seed = atoi(argv[3]);
 
     if (num_customers > MAX_CUSTOMERS) {
-        printf("Error Input %d. Number of customers should not exceed %d.\n",
+        printf("Error Input %d. Number of customers should not exceed %d.\n", 
             num_customers, MAX_CUSTOMERS);
         exit(1);
     }
 
     if (num_stairs > MAX_STAIRS) {
-        printf("Error Input %d. Number of stairs should not exceed %d.\n",
+        printf("Error Input %d. Number of stairs should not exceed %d.\n", 
             num_stairs, MAX_STAIRS);
         exit(1);
     }
-
-    printf("Number of Customers: %d\nNumber of stairs: %d\n", num_customers,
+   
+    printf("Number of Customers: %d\nNumber of stairs: %d\n", num_customers, 
         num_stairs);
 
-    // Initializes the semaphore. Set the pshared as 0 so that this semaphore is
+    // Initializes the semaphore. Set the pshared as 0 so that this semaphore is 
     // shared between the threads of a process. Set value as `num_stairs` means
     // initially there are `num_stairs` empty spaces for customers to use.
     sem_init(&sem, 0, num_stairs);
@@ -123,7 +130,7 @@ int main(int argc, char *argv[]) {
     tid = (pthread_t *)malloc(sizeof(pthread_t) * num_customers);
     // Define an array of thread arguments.
     thread_arg_t args[num_customers];
-    // Seed the random number generator as current time.
+    // Seed the random number generator as current time (time(NULL)) or input seed.
     srand(seed);
 
     for (int i = 0; i < num_customers; i++) {
@@ -131,14 +138,14 @@ int main(int argc, char *argv[]) {
         args[i].index = i;
         // Set direction as random 0 or 1.
         args[i].direction = rand() % 2;
-        printf("Customer %d goes up or down (0 for up, 1 for down): %d\n",
+        printf("Customer %d goes up or down (0 for up, 1 for down): %d\n", 
             args[i].index, args[i].direction);
         if (pthread_create(&tid[i], NULL, threadfunction, (void *)&args[i])) {
             printf("Error occurs in thread creation.");
             exit(1);
         }
         // Sleep for random 1 to 10 time.
-        sleep(rand() % 10 + 1);
+        sleep(rand() % 5 + 1);
     }
 
     // for each thread created, call pthread_join(..)
@@ -154,7 +161,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < num_customers; i++) {
         turnaround[i] = (args[i].end_time.tv_sec - args[i].start_time.tv_sec) +
          (args[i].end_time.tv_usec - args[i].start_time.tv_usec) * 1e-6;
-        printf("Customer %d turnaround time is %.4f seconds.\n", i,
+        printf("Customer %d turnaround time is %.4f seconds.\n", i, 
             turnaround[i]);
         sum_turnaround += turnaround[i];
     }
