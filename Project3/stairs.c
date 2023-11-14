@@ -40,32 +40,32 @@ void *threadfunction (void *vargp) {
     int id = t_arg->index;
     int direction = t_arg->direction;
 
-    sem_wait(&sem);
+    semwait(&sem);
 
     if (direction == 0) {
       if (downCount > 0) {
         printf("Customer %d going up should wait\n", id);
-        sem_post(&sem);
-        sem_wait(&sem);
+        sempost(&sem);
+        semwait(&sem);
       }
       upCount++;
     } else {
       if (upCount > 0) {
         printf("Customer %d going down should wait\n", id);
-        sem_post(&sem);
-        sem_wait(&sem);
+        sempost(&sem);
+        semwait(&sem);
       }
       downCount++;
     }
 
-    sem_post(&sem);
+    sempost(&sem);
 
-    time_t start_time = time(NULL);
+    // time_t start_time = time(NULL);
     printf("Customer %d crossing the stairs now \n", id);
     sleep(rand() % 10);
-    time_t end_time = time(NULL);
+    // time_t end_time = time(NULL);
 
-    sem_wait(&sem);
+    semwait(&sem);
 
     if (direction == 0) {
       upCount--;
@@ -73,11 +73,11 @@ void *threadfunction (void *vargp) {
       downCount--;
     }
 
-    sem_post(&sem);
+    sempost(&sem);
     printf("Customer %d finished stairs \n", id);
 
-    time_t turnaround = end_time - start_time;
-    printf("turnaround time is %ld seconds\n", turnaround);
+    // time_t turnaround = end_time - start_time;
+    // printf("turnaround time is %ld seconds\n", turnaround);
 
     pthread_exit(NULL);
 }
@@ -128,33 +128,37 @@ int main(int argc, char *argv[]) {
     tid = (pthread_t *)malloc(sizeof(pthread_t) * num_customers);
     // Seed the random number generator as current time.
     srand(time(NULL));
+    time_t start_time[num_customers];
 
     for (int i = 0; i < num_customers; i++) {
         // Set direction as random 0 or 1.
         int rand_direction = rand() % 2;
         thread_arg_t args = {i, rand_direction};
+        printf("Customer %d goes up or down (0 for up, 1 for down): %d\n", 
+            i, rand_direction);
         if (pthread_create(&tid[i], NULL, threadfunction, &args)) {
             printf("Error occurs in thread creation.");
             exit(1);
         }
-        sleep(rand() % 100 + 1);
+        start_time[i] = time(NULL);
+        sleep(rand() % 5 + 1);
     }
 
-  // your code here
 
-    time_t turnaround[num_customers];
-	// for each thread created, call pthread_join(..)
+    // for each thread created, call pthread_join(..)
+    time_t end_time[num_customers];
     for (int i = 0; i < num_customers; i++) {
-        time_t start_time = time(NULL);
         pthread_join(tid[i], NULL);
-        time_t end_time = time(NULL);
-        turnaround[i] = end_time - start_time;
+        end_time[i] = time(NULL);
     }
 
    // printf turnaround time for each thread and average turnaround time
+    time_t turnaround[num_customers];
     double sum_turnaround;
+
     for (int i = 0; i < num_customers; i++) {
-        printf("Thread %d turnaround time is %.4f seconds.\n", i, 
+        turnaround[i] = end_time[i] - start_time[i];
+        printf("Customer %d turnaround time is %.4f seconds.\n", i, 
             (double) turnaround[i]);
         sum_turnaround += (double) turnaround[i];
     }
