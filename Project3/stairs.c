@@ -95,6 +95,7 @@ int main(int argc, char *argv[]) {
     // Get number of customers and number of stairs from command-line arguments.
     int num_customers = atoi(argv[1]);
     int num_stairs = atoi(argv[2]);
+    int seed = atoi(argv[3]);
 
     if (num_customers > MAX_CUSTOMERS) {
         printf("Error Input %d. Number of customers should not exceed %d.\n", 
@@ -123,7 +124,7 @@ int main(int argc, char *argv[]) {
     // Define an array of thread arguments.
     thread_arg_t args[num_customers];
     // Seed the random number generator as current time.
-    srand(time(NULL));
+    srand(seed);
 
     for (int i = 0; i < num_customers; i++) {
         // Set thread index as i.
