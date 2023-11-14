@@ -5,3 +5,20 @@ Description of project 3
 
 
 Project implementation
+
+
+*The mutex is used to protect shared data and ensure that critical sections are accessed by only one thread at a time. It guards the critical sections where the counts of customers waiting to go up or down (upCount and downCount) are updated.
+
+*The sem semaphore is used to ensure mutual exclusion during the creation of threadFunction to prevent race conditions in thread creation.
+It is also used to control access to critical sections where counts are updated, preventing multiple threads from simultaneously updating counts.
+
+*Deadlock Prevention:
+Deadlock can occur when two or more threads are blocked indefinitely, waiting for each other. In this code, the use of pthread_mutex_lock and pthread_mutex_unlock around critical sections ensures that only one thread at a time can modify the shared count (on_stairs). Deadlock is prevented by releasing the mutex (pthread_mutex_unlock) before waiting on the semaphore (sem_wait).
+*Starvation Prevention:
+Starvation occurs when a thread is perpetually denied access to the resource it needs. In this code: the semaphore (sem) is used to ensure mutual exclusion during thread creation, preventing a scenario where threads might be stuck in a race condition during creation.
+Each customer thread checks if there are customers going in the opposite direction and waits if necessary. This prevents starvation by allowing fairness in using the stairs.
+
+* Average turnaround time for 4 customer and 6 stairs is 7s
+  Average turnaround time for 3 customer and 6 stairs is 10s
+  Average turnaround time for 2 customer and 10 stairs is 6.5s
+  The use of a mutex (pthread_mutex_t mutex) and a semaphore (sem_t sem) is designed to minimize contention in critical sections. Contention occurs when multiple threads attempt to access shared resources simultaneously. The use of mutexes ensures that only one thread can update the shared counts (upCount and downCount) at a time
