@@ -145,21 +145,21 @@ int main(int argc, char *argv[]) {
         pthread_join(tid[i], NULL);
     }
 
-   // printf turnaround time for each thread and average turnaround time
-    long turnaround[num_customers];
+    // printf turnaround time for each thread and average turnaround time
+    double turnaround[num_customers];
     // Initialize the sum of turnaround as 0.
-    long sum_turnaround = 0;
+    double sum_turnaround = 0;
 
     for (int i = 0; i < num_customers; i++) {
         turnaround[i] = (args[i].end_time.tv_sec - args[i].start_time.tv_sec) +
          (args[i].end_time.tv_usec - args[i].start_time.tv_usec) * 1e-6;
-        printf("Customer %d turnaround time is %ld seconds.\n", i, 
+        printf("Customer %d turnaround time is %.4f seconds.\n", i, 
             turnaround[i]);
         sum_turnaround += turnaround[i];
     }
 
-    long avg_turnaround = sum_turnaround / num_customers;
-    printf("Average turnaround time is %ld seconds.\n", avg_turnaround);
+    double avg_turnaround = sum_turnaround / num_customers;
+    printf("Average turnaround time is %.4f seconds.\n", avg_turnaround);
 
   // free every pointer you used malloc for
     cleanup();
