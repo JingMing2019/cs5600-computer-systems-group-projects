@@ -65,7 +65,7 @@ void *threadfunction (void *vargp) {
     sempost(&sem);
 
     printf("Customer %d crossing the stairs now \n", id);
-    sleep(rand() % 10);
+    sleep(3);
 
     semwait(&sem);
 
@@ -98,21 +98,21 @@ int main(int argc, char *argv[]) {
     int seed = atoi(argv[3]);
 
     if (num_customers > MAX_CUSTOMERS) {
-        printf("Error Input %d. Number of customers should not exceed %d.\n", 
+        printf("Error Input %d. Number of customers should not exceed %d.\n",
             num_customers, MAX_CUSTOMERS);
         exit(1);
     }
 
     if (num_stairs > MAX_STAIRS) {
-        printf("Error Input %d. Number of stairs should not exceed %d.\n", 
+        printf("Error Input %d. Number of stairs should not exceed %d.\n",
             num_stairs, MAX_STAIRS);
         exit(1);
     }
-   
-    printf("Number of Customers: %d\nNumber of stairs: %d\n", num_customers, 
+
+    printf("Number of Customers: %d\nNumber of stairs: %d\n", num_customers,
         num_stairs);
 
-    // Initializes the semaphore. Set the pshared as 0 so that this semaphore is 
+    // Initializes the semaphore. Set the pshared as 0 so that this semaphore is
     // shared between the threads of a process. Set value as `num_stairs` means
     // initially there are `num_stairs` empty spaces for customers to use.
     sem_init(&sem, 0, num_stairs);
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
         args[i].index = i;
         // Set direction as random 0 or 1.
         args[i].direction = rand() % 2;
-        printf("Customer %d goes up or down (0 for up, 1 for down): %d\n", 
+        printf("Customer %d goes up or down (0 for up, 1 for down): %d\n",
             args[i].index, args[i].direction);
         if (pthread_create(&tid[i], NULL, threadfunction, (void *)&args[i])) {
             printf("Error occurs in thread creation.");
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < num_customers; i++) {
         turnaround[i] = (args[i].end_time.tv_sec - args[i].start_time.tv_sec) +
          (args[i].end_time.tv_usec - args[i].start_time.tv_usec) * 1e-6;
-        printf("Customer %d turnaround time is %.4f seconds.\n", i, 
+        printf("Customer %d turnaround time is %.4f seconds.\n", i,
             turnaround[i]);
         sum_turnaround += turnaround[i];
     }
