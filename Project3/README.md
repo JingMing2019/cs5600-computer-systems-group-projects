@@ -6,11 +6,11 @@ This project is using semaphores and mutex locks in a multi-threaded C program, 
 
 **Project implementation**  
 •  List the functions you wrote, and the purpose of each function  
-`void *threadfunction(void *vargp);`  
-The function is to represent the behavior of a customer thread in the program and manage customer interactions by checking and updating the direction of customers on the stairs, ensuring synchronization and preventing conflicts. It uses two semaphores(available_stairs_sem and is_stairs_empty_sem) and two mutex locks(release_semaphore_mutex and change_current_direction_mutex) to coordinate the movement of customers, including waiting for available spaces on the stairs and handling the completion of stair-crossing tasks. The function also records timing information for each customer to make sure each thread will sleep for a constant period.
-`void cleanup();`  
-This function is to perform cleanup operations in our multi-thread program. It includes freeing dynamically allocated memory(tid), destroying mutexes used for synchronization, and destroying semaphores used for coordinating access to shared resources.
-`int main(int argc, char *argv[])`  
+**`void *threadfunction(void *vargp);`**  
+The function is to represent the behavior of a customer thread in the program and manage customer interactions by checking and updating the direction of customers on the stairs, ensuring synchronization and preventing conflicts. It uses two semaphores(available_stairs_sem and is_stairs_empty_sem) and two mutex locks(release_semaphore_mutex and change_current_direction_mutex) to coordinate the movement of customers, including waiting for available spaces on the stairs and handling the completion of stair-crossing tasks. The function also records timing information for each customer to make sure each thread will sleep for a constant period.  
+**`void cleanup();`**  
+This function is to perform cleanup operations in our multi-thread program. It includes freeing dynamically allocated memory(tid), destroying mutexes used for synchronization, and destroying semaphores used for coordinating access to shared resources.  
+**`int main(int argc, char *argv[])`**  
 This function is the entry point of this program and it parses command-line arguments to obtain the number of customers(num_customers), the number of stairs(num_stairs) and a seed for random number generation. According to the arguments values, we could validate the inputs, initialze semaphores, allocate memory, create and join threads, calculate turnaround time and finally do the cleanup work.
 
 • Explain how you tested your project and list the test cases you used.  
