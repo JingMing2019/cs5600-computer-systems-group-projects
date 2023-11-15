@@ -7,16 +7,16 @@
 // You can write your own semwait function that can call sem_wait(sem) or sem_trywait(sem)
 // in addition to checking/setting proper variables
 // properly use pthread_mutex_lock/unlock
-int semwait(sem_t* sem) {
-    return sem_wait(sem);
-}
+// int semwait(sem_t* sem) {
+//     return sem_wait(sem);
+// }
 
 // You can write your own sempost function that call sem_post(sem)
 // in addition to checking/setting proper variables
 // properly use pthread_mutex_lock/unlock
-int sempost(sem_t* sem) {
-    return sem_post(sem);
-}
+// int sempost(sem_t* sem) {
+//     return sem_post(sem);
+// }
 
 void *threadfunction (void *vargp) {
     // write the threadfunction whose name should be part of pthread_create(..)
@@ -47,7 +47,7 @@ void *threadfunction (void *vargp) {
         }
         // Wait for stairs to be empty. Once return means this new customer
         // can change the direction and start crossing the stairs.
-        semwait(&is_stairs_empty_sem);
+        sem_wait(&is_stairs_empty_sem);
 
         current_direction = direction;
         printf("Crossing direction set to %s.\n",
@@ -59,7 +59,7 @@ void *threadfunction (void *vargp) {
     // available spaces. If staris are serving `num_stairs` of customers, the
     // next customer should wait. Once return, means customer can cross the
     // stairs now.
-    semwait(&available_stairs_sem);
+    sem_wait(&available_stairs_sem);
     printf("%d\tgoing\t%s\n", id, (direction == 0) ? "up" : "down");
 
     // Simulate customer walking on stairs. Sleep for constant time.
@@ -68,7 +68,7 @@ void *threadfunction (void *vargp) {
     // Release semaphore.
     pthread_mutex_lock(&release_semaphore_mutex);
     // Increase available stairs.
-    sempost(&available_stairs_sem);
+    sem_post(&available_stairs_sem);
     // once return from sempost means customer has finished crossing the stairs.
     printf("%d\tdone\t%s\n", id, (direction == 0) ? "up" : "down");
     // Get current value of `available_stairs_sem`.
@@ -80,7 +80,7 @@ void *threadfunction (void *vargp) {
     // Reset `current_direction` to -1 indicates that no customers are on the
     // stairs now.
     if (tmp_sem_value == num_stairs) {
-        sempost(&is_stairs_empty_sem);
+        sem_post(&is_stairs_empty_sem);
         printf("The stairs are vacant.\n");
         current_direction = -1;
     }
