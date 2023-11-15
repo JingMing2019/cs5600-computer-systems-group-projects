@@ -37,18 +37,27 @@ int MAX_CUS_ON_STAIRS = 1;
 pthread_t *tid;
 
 // Define global variables on the allowed direction, waiting threads, ...
+// Changing them should be guarded by a mutex.
+int num_stairs; // user input number of stairs
+// Define direction of set of customers currently crossing the stairs. Initalize
+// it as -1 means currently no customers on the stairs.
+int current_direction = -1;
 
 // initialize the mutex with the constant which is provided by pthread.h library
 // to set all the fields of the mutex attributes structure to default values
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-// initialize a semaphore
-sem_t sem;
-// define the number of customers currently on the stairs
-int on_stairs = 0;
+// `release_semaphore_mutex` makes sure only one thread can increase semaphore
+// value at the same time.
+pthread_mutex_t release_semaphore_mutex = PTHREAD_MUTEX_INITIALIZER;
+// `direction_change_mutex` guards the global variable current_direciotn.
+pthread_mutex_t change_current_direction_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+// Define semaphore
+sem_t available_stairs_sem;
+sem_t is_stairs_empty_sem;
 
 
 // write any helper functions you need here
-void semwait(sem_t *sem);
-void sempost(sem_t *sem);
+int semwait(sem_t *sem);
+int sempost(sem_t *sem);
 void *threadfunction(void *vargp);
 void cleanup();
