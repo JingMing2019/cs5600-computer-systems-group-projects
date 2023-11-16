@@ -116,15 +116,15 @@ int main(int argc, char *argv[]) {
     int seed = atoi(argv[3]);
 
     // Check input validation.
-    if (num_customers > MAX_CUSTOMERS) {
-        printf("Error Input %d. Number of customers should not exceed %d.\n", 
-            num_customers, MAX_CUSTOMERS);
+    if (num_customers > MAX_CUSTOMERS || num_customers < MIN_CUSTOMERS) {
+        printf("Error Input %d. Number of customers should not exceed [%d, %d].", 
+            num_customers, MIN_CUSTOMERS, MAX_CUSTOMERS);
         exit(1);
     }
 
-    if (num_stairs > MAX_STAIRS) {
-        printf("Error Input %d. Number of stairs should not exceed %d.\n", 
-            num_stairs, MAX_STAIRS);
+    if (num_stairs > MAX_STAIRS || num_stairs < MIN_STAIRS) {
+        printf("Error Input %d. Number of stairs should not exceed [%d, %d].", 
+            num_stairs, MIN_STAIRS, MAX_STAIRS);
         exit(1);
     }
    

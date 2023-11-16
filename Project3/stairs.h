@@ -21,10 +21,12 @@ typedef struct thread_arg {
 // global constants
 // define any global constants you want to use in your code
 
-// #define the maximum number of customers/threads in the system to test
+// #define the maximum/minimum number of customers/threads in the system to test
 int MAX_CUSTOMERS = 30;
-// define the maximum number of steps(or stairs)
+int MIN_CUSTOMERS = 1;
+// define the maximum/minimum number of steps(or stairs)
 int MAX_STAIRS = 13;
+int MIN_STAIRS = 1;
 // #define how many customer can be on the stairs at the same time
 // int MAX_CUS_ON_STAIRS = 1;
 // you can also define other constants for your "prevent deadlock" or "prevent starvation" algorithm
