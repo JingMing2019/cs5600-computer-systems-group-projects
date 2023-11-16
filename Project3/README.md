@@ -16,28 +16,28 @@ This function is the entry point of this program and it parses command-line argu
 ## Explain how you tested your project and list the test cases you used.
 We tested our project by passing various configurations of `num_customers`, `num_stairs` and `seed` arguments to the main function to see if the function works well under different situations. Besides, edges cases such as invalid `num_customers` and `num_stairs` input have been tested as well. Since the `direction` of each customer/thread is randomly set by `rand()`, we also manually created some corner cases like all customers want to go down the stairs to test functionality. At last we tested cases that all customers come at the same time by comment the `sleep()` instruction after each thread creation.
 **Test Cases**
-1. Various Configurations of arguments (`num_customers`, `num_stairs`, `seed`)
+* Various Configurations of arguments (`num_customers`, `num_stairs`, `seed`)
   1. (3, 1, 100)
   2. (5, 2, 10)
   3. (6, 7, 9)
   4. (18, 10, 300)
   5. (30, 13, 999)
-2. Edge cases ragarding the input
+* Edge cases ragarding the input
   1. not enough arguments
   2. `num_customers` = 31, `num_customers` = -1
   3. `num_stairs` = 100, `num_stairs` = 0
-3. Manually set `direction`
+* Manually set `direction`
   1. `direction` = {0, 0, 0, 1, 0, 0, 0}, `num_customers` = 7,  `num_stairs` = 2
   2. `direction` = {0, 0, 0, 1, 0, 0, 0}, `num_customers` = 7,  `num_stairs` = 13
   3. `direction` = {0, 0, 0, 1, 0, 1, 0}, `num_customers` = 7,  `num_stairs` = 3
   4. `direction` = {0, 0, 0, 1, 0, 1, 0}, `num_customers` = 7,  `num_stairs` = 12
   5. `direction` = {0, 0, 0, 0, 0, 0}, `num_customers` = 6,  `num_stairs` = 2
   6. `direction` = {0, 0, 0, 0, 0, 0}, `num_customers` = 6,  `num_stairs` = 13
-4. Customers came at the same time, comment `sleep()`
+* Customers came at the same time, comment `sleep()`
   1. `num_customers` = 8,  `num_stairs` = 5, `seed` = 99
   2. `direction` = {0, 0, 0, 1, 0, 0, 0}, `num_customers` = 7,  `num_stairs` = 2
   3. `direction` = {0, 0, 0, 1, 0, 1, 0}, `num_customers` = 7,  `num_stairs` = 3
-5. Use `valgrind` to see if the process creates memory leak or other problems.
+* Use `valgrind` to see if the process creates memory leak or other problems.
 
 ## Explain how you guarantee that your code is free of deadlock and starvation.
 1. The mutex is used to protect shared data and ensure that critical sections are accessed by only one thread at a time. It guards the critical sections where current direction is updated.
@@ -46,6 +46,7 @@ We tested our project by passing various configurations of `num_customers`, `num
 Deadlock can occur when two or more threads are blocked indefinitely, waiting for each other. In this code, the use of pthread_mutex_lock and pthread_mutex_unlock around critical sections ensures that only one thread at a time can modify the shared count (on_stairs). Deadlock is prevented by releasing the mutex (pthread_mutex_unlock) before waiting on the semaphore (sem_wait).
 4. Starvation Prevention:
 Starvation occurs when a thread is perpetually denied access to the resource it needs. In this code: the semaphore (sem) is used to ensure mutual exclusion during thread creation, preventing a scenario where threads might be stuck in a race condition during creation.
+
 Each customer thread checks if there are customers going in the opposite direction and waits if necessary. This prevents starvation by allowing fairness in using the stairs.
 
 ## Find the average Turnaround time of the examples you run, and explain using these performance measures how you adjusted your project to make your design “efficient”.
@@ -55,9 +56,12 @@ Each customer thread checks if there are customers going in the opposite directi
 3. Average turnaround time for 6 customers and 7 stairs is 3.1689 seconds.
 4. Average turnaround time for 18 customers and 10 stairs is 3.3924 seconds.
 5. Average turnaround time for 30 customers and 13 stairs is 7.3306 seconds.
+
 From first 4 results we can see that the average turnaround time is around 3 seconds. Remind that in our program each thread will sleep constant 3 seconds after crossing the stairs to simulate the going over stairs action. The experimented average turnaround time is close to this sleep time. This indicates that each thread does not wait for a long time to step on stairs after they've arrived, which is an evidence to prove that our program is efficient. Though the fifth test case shows that the average turnaround time is 7 seconds, which is much longer than the 3 seconds. This is because we sleep random seconds between the creation of each threads, say 1 to 3 seconds. This very short sleep time makes later threads came as early as many previous threads have not finished their tasks which increases the turnaround time for later threads. If we make this sleep time longer, more threads will finish crossing stairs before the arrival of later threads. Hence it can shorten the turnaround time of later threads and in turn shorten the average turnaround time.
+
 6. Average turnaround time for 7 customers (only the forth customer is going down while the other customers are going up) and 2 stairs is 3.8575 seconds.
 7. Average turnaround time for 7 customers (the forth and sixth customers are going down while the other customers are going up) and 2 stairs is 4.7161 seconds.
+
 Comapre above 6 and 7 test cases, we can see that case 7 takes longer turnaround time. This is because the strategy of our program is if a thread with the opposite direciton (different than the direction that stairs are currently serving) arrives, we hold all later threads, wait for previous threads to finish crossing and then change the current direction to let this thread go on the stairs. This strategy is designed to prevent starvation. Since case 7 need to do 1 more direction change than case 6, it needs more time for later threads to wait.
 
 ## Explain how we can compile, run and test your code.
