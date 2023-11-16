@@ -16,28 +16,28 @@ This function is the entry point of this program and it parses command-line argu
 ## Explain how you tested your project and list the test cases you used.
 We tested our project by passing various configurations of `num_customers`, `num_stairs` and `seed` arguments to the main function to see if the function works well under different situations. Besides, edges cases such as invalid `num_customers` and `num_stairs` input have been tested as well. Since the `direction` of each customer/thread is randomly set by `rand()`, we also manually created some corner cases like all customers want to go down the stairs to test functionality. At last we tested cases that all customers come at the same time by comment the `sleep()` instruction after each thread creation.
 **Test Cases**
-* Various Configurations of arguments (`num_customers`, `num_stairs`, `seed`)
-  1. (3, 1, 100)
-  2. (5, 2, 10)
-  3. (6, 7, 9)
-  4. (18, 10, 300)
-  5. (30, 13, 999)
-* Edge cases ragarding the input
-  1. not enough arguments
-  2. `num_customers` = 31, `num_customers` = -1
-  3. `num_stairs` = 100, `num_stairs` = 0
-* Manually set `direction`
-  1. `direction` = {0, 0, 0, 1, 0, 0, 0}, `num_customers` = 7,  `num_stairs` = 2
-  2. `direction` = {0, 0, 0, 1, 0, 0, 0}, `num_customers` = 7,  `num_stairs` = 13
-  3. `direction` = {0, 0, 0, 1, 0, 1, 0}, `num_customers` = 7,  `num_stairs` = 3
-  4. `direction` = {0, 0, 0, 1, 0, 1, 0}, `num_customers` = 7,  `num_stairs` = 12
-  5. `direction` = {0, 0, 0, 0, 0, 0}, `num_customers` = 6,  `num_stairs` = 2
-  6. `direction` = {0, 0, 0, 0, 0, 0}, `num_customers` = 6,  `num_stairs` = 13
-* Customers came at the same time, comment `sleep()`
-  1. `num_customers` = 8,  `num_stairs` = 5, `seed` = 99
-  2. `direction` = {0, 0, 0, 1, 0, 0, 0}, `num_customers` = 7,  `num_stairs` = 2
-  3. `direction` = {0, 0, 0, 1, 0, 1, 0}, `num_customers` = 7,  `num_stairs` = 3
-* Use `valgrind` to see if the process creates memory leak or other problems.
+1. Various Configurations of arguments (`num_customers`, `num_stairs`, `seed`)
+    1. (3, 1, 100)
+    2. (5, 2, 10)
+    3. (6, 7, 9)
+    4. (18, 10, 300)
+    5. (30, 13, 999)
+2. Edge cases ragarding the input
+    1. not enough arguments
+    2. `num_customers` = 31, `num_customers` = -1
+    3. `num_stairs` = 100, `num_stairs` = 0
+3. Manually set `direction`
+    1. `direction` = {0, 0, 0, 1, 0, 0, 0}, `num_customers` = 7,  `num_stairs` = 2
+    2. `direction` = {0, 0, 0, 1, 0, 0, 0}, `num_customers` = 7,  `num_stairs` = 13
+    3. `direction` = {0, 0, 0, 1, 0, 1, 0}, `num_customers` = 7,  `num_stairs` = 3
+    4. `direction` = {0, 0, 0, 1, 0, 1, 0}, `num_customers` = 7,  `num_stairs` = 12
+    5. `direction` = {0, 0, 0, 0, 0, 0}, `num_customers` = 6,  `num_stairs` = 2
+    6. `direction` = {0, 0, 0, 0, 0, 0}, `num_customers` = 6,  `num_stairs` = 13
+4. Customers came at the same time, comment `sleep()`
+    1. `num_customers` = 8,  `num_stairs` = 5, `seed` = 99
+    2. `direction` = {0, 0, 0, 1, 0, 0, 0}, `num_customers` = 7,  `num_stairs` = 2
+    3. `direction` = {0, 0, 0, 1, 0, 1, 0}, `num_customers` = 7,  `num_stairs` = 3
+5. Use `valgrind` to see if the process creates memory leak or other problems.
 
 ## Explain how you guarantee that your code is free of deadlock and starvation.
 1. The mutex is used to protect shared data and ensure that critical sections are accessed by only one thread at a time. It guards the critical sections where current direction is updated.
