@@ -40,9 +40,8 @@ We tested our project by passing various configurations of `num_customers`, `num
 5. Use `valgrind` to see if the process creates memory leak or other problems.
 
 ## Explain how you guarantee that your code is free of deadlock and starvation.
-1. The mutex is used to protect shared data and ensure that critical sections are accessed by only one thread at a time. It guards the critical sections where the counts of customers waiting to go up or down (upCount and downCount) are updated.
-2. The sem semaphore is used to ensure mutual exclusion during the creation of threadFunction to prevent race conditions in thread creation.
-It is also used to control access to critical sections where counts are updated, preventing multiple threads from simultaneously updating counts.
+1. The mutex is used to protect shared data and ensure that critical sections are accessed by only one thread at a time. It guards the critical sections where current direction is updated.
+2. The sem semaphore is used to ensure mutual exclusion during the creation of threadFunction to prevent race conditions in thread creation. It is also used to control access to critical sections where direction is updated, preventing multiple threads from simultaneously updating direction.
 3. Deadlock Prevention:
 Deadlock can occur when two or more threads are blocked indefinitely, waiting for each other. In this code, the use of pthread_mutex_lock and pthread_mutex_unlock around critical sections ensures that only one thread at a time can modify the shared count (on_stairs). Deadlock is prevented by releasing the mutex (pthread_mutex_unlock) before waiting on the semaphore (sem_wait).
 4. Starvation Prevention:
